@@ -4,4 +4,4 @@ TVM_PATH=~/soo/tvm
 # Re-build TVM
 cd $TVM_PATH/build
 cmake ..
-make -j64
+make -j4

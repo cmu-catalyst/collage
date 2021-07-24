@@ -8,4 +8,4 @@ cd $TVM_PATH
 cp cmake/config.cmake build/
 cd build
 cmake ..
-make clean && make -j64
+make clean && make -j4
