@@ -28,8 +28,8 @@
 #include <assert.h>  
 
 // cudnn v8
-#include <cudnn_frontend_find_plan.h>
-#include <cudnn_frontend_get_plan.h>
+//#include <cudnn_frontend_find_plan.h>
+//#include <cudnn_frontend_get_plan.h>
 
 #define GET_DOUBLE(X) *((double*)X)
 #define GET_FLOAT(X) *((float*)(X))
@@ -38,7 +38,7 @@ namespace tvm {
 namespace contrib {
 
 using namespace runtime;
-
+/*
 using common_convbias_descriptors = std::tuple<cudnn_frontend::Tensor,
                                                cudnn_frontend::Tensor,
                                                cudnn_frontend::Tensor,
@@ -47,7 +47,7 @@ using common_convbias_descriptors = std::tuple<cudnn_frontend::Tensor,
                                                cudnn_frontend::Tensor,
                                                cudnn_frontend::Tensor,
                                                cudnn_frontend::Tensor>;
-
+*/
 enum {
     X_TENSOR,
     Y_TENSOR,
@@ -76,7 +76,7 @@ void generateStrides(const int64_t* dimA, int64_t* strideA, int nbDims, cudnnTen
     }
 }
 
-
+/*
 common_convbias_descriptors
 create_conv_bias_add_act_descriptors(
                                      int dim,
@@ -191,12 +191,11 @@ auto heurgen_method = [](cudnn_frontend::OperationGraph &opGraph) -> cudnn_front
     return filtered_configs;
 };
 
-
+*/
 void MatmulActivationForward(int mode, int format, int algo, int mmdim, int groups,
     const int64_t pad[],const int64_t stride[], const int64_t dilation[],
     DLTensor* x, DLTensor* w, DLTensor* y,
     const std::string& dtype, const void* alphas[], int actvMode, int reluNanOpt, double actvCoeff) {
-
 
   /*
   
@@ -394,7 +393,7 @@ void ConvolutionActivationForward(int mode, int format, int algo, int convDim, i
     DLTensor* x, DLTensor* w, DLTensor* y,
     const std::string& conv_dtype, const void* alphas[], int actvMode, int reluNanOpt, double actvCoeff) {
 
-
+/*
   CuDNNThreadEntry* entry_ptr = CuDNNThreadEntry::ThreadLocal();
   // Set Mode
   entry_ptr->fused_conv_entry.mode = static_cast<cudnnConvolutionMode_t>(mode);
@@ -454,7 +453,7 @@ void ConvolutionActivationForward(int mode, int format, int algo, int convDim, i
       entry_ptr->fused_conv_entry.data_type,
       entry_ptr->fused_conv_entry.tensor_format
       );
-  
+  */
   /*
   std::cout << "X:\t" << std::get<X_TENSOR>(tensors).describe() << std::endl;
   std::cout << "Y:\t " << std::get<Y_TENSOR>(tensors).describe() << std::endl;
@@ -462,7 +461,7 @@ void ConvolutionActivationForward(int mode, int format, int algo, int convDim, i
   std::cout << "After conv:\t" << std::get<AFTERCONV_TENSOR>(tensors).describe() << std::endl;
   */
 
-
+/*
   // Define the activation operation
   auto actDesc = cudnn_frontend::PointWiseDescBuilder()
                      .setMode(CUDNN_POINTWISE_RELU_FWD)
@@ -514,7 +513,7 @@ void ConvolutionActivationForward(int mode, int format, int algo, int convDim, i
                       .setHandle(entry_ptr->handle)
                       .setOperationGraph(ops.size(), ops.data())
                       .build();
-
+*/
   /*
   //std::cerr << "ConvForwardWorkspace\n";
   size_t workspace_size = 0;
@@ -543,6 +542,7 @@ void ConvolutionActivationForward(int mode, int format, int algo, int convDim, i
   }
   */
 
+	/*
   // How many engines support this operation graph ?
   //auto total_engines = opGraph.getEngineCount();
   //std::cout << opGraph.describe() << " has " << total_engines << " engines." << std::endl;
@@ -594,17 +594,17 @@ void ConvolutionActivationForward(int mode, int format, int algo, int convDim, i
 
   auto options = generator.cudnnFindPlan<cudnn_frontend::CudnnFindSamplingTechnique::CUDNN_FIND_SAMPLE_MEDIAN_OF_THREE>(
             entry_ptr->handle, std::move(opGraph), variantPack, sample_predicate_function);
-
+*/
   /*
   std::for_each(options.begin(), options.end(), [](struct cudnn_frontend::executionOption& opt) {
       std::cout << "Plan: " << opt.plan.getTag() << " finished in " << opt.time_ms << " ms,"
                 << " workspace: " << opt.plan.getWorkspaceSize() << " bytes" << std::endl;
   });
   */
-
+/*
   //cudnnStatus_t status =
   CUDNN_CALL(cudnnBackendExecute(entry_ptr->handle, options.front().plan.get_raw_desc(), variantPack.get_raw_desc()));
-
+*/
 }
 
 void ConvolutionBiasActivationForward(int mode, int format, int algo, int convDim, int groups,
@@ -786,7 +786,7 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
     DLTensor* x, DLTensor* w, DLTensor* z, DLTensor* bias, DLTensor* y,
     const std::string& conv_dtype, const void* alphas[], int actvMode, int reluNanOpt, double actvCoeff) {
 
-
+/*
   CuDNNThreadEntry* entry_ptr = CuDNNThreadEntry::ThreadLocal();
   // Set Mode
   entry_ptr->fused_conv_entry.mode = static_cast<cudnnConvolutionMode_t>(mode);
@@ -848,7 +848,7 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
       entry_ptr->fused_conv_entry.data_type,
       entry_ptr->fused_conv_entry.tensor_format
       );
-  
+  */
   /* 
   std::cout << "X:\t" << std::get<X_TENSOR>(tensors).describe() << std::endl;
   std::cout << "Y:\t " << std::get<Y_TENSOR>(tensors).describe() << std::endl;
@@ -859,7 +859,7 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
   std::cout << "After bias:\t" << std::get<AFTERBIAS_TENSOR>(tensors).describe() << std::endl;
   std::cout << "After conv:\t" << std::get<AFTERCONV_TENSOR>(tensors).describe() << std::endl;
   */
-
+/*
   // Define the add operation
   auto addDesc = cudnn_frontend::PointWiseDescBuilder()
                      .setMode(CUDNN_POINTWISE_ADD)
@@ -946,7 +946,7 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
                       .setOperationGraph(ops.size(), ops.data())
                       .build();
 
-
+*/
   /*
   //std::cerr << "ConvForwardWorkspace\n";
   size_t workspace_size = 0;
@@ -975,6 +975,7 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
   }
   */
 
+	/*
   // How many engines support this operation graph ?
   //auto total_engines = opGraph.getEngineCount();
   //std::cout << opGraph.describe() << " has " << total_engines << " engines." << std::endl;
@@ -1028,6 +1029,7 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
   auto options = generator.cudnnFindPlan<cudnn_frontend::CudnnFindSamplingTechnique::CUDNN_FIND_SAMPLE_MEDIAN_OF_THREE>(
             entry_ptr->handle, std::move(opGraph), variantPack, sample_predicate_function);
 
+	    */
   /*
   std::for_each(options.begin(), options.end(), [](struct cudnn_frontend::executionOption& opt) {
       std::cout << "Plan: " << opt.plan.getTag() << " finished in " << opt.time_ms << " ms,"
@@ -1035,9 +1037,10 @@ void ConvolutionBiasActivationForwardWithFE(int mode, int format, int algo, int 
   });
   */
 
+	/*
   //cudnnStatus_t status =
   CUDNN_CALL(cudnnBackendExecute(entry_ptr->handle, options.front().plan.get_raw_desc(), variantPack.get_raw_desc()));
-
+*/
 }
 
 
