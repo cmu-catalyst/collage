@@ -145,7 +145,8 @@ from torchvision.models import resnet
 torch.backends.cudnn.benchmark = True
 
 NAME = 'mobilenet_v2'
-
+# W = 56
+W = 224
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--iterations", help="How many iterations to average for timing", type=int, default=500)
@@ -154,7 +155,7 @@ if __name__ == '__main__':
 
     model = mobilenet_v2().cuda()
     model.eval()
-    inputs = torch.randn(1, 32, 56, 56).cuda()
+    inputs = torch.randn(1, 32, W, W).cuda()
 
     from torch2trt import torch2trt
     import time
@@ -200,7 +201,7 @@ if __name__ == '__main__':
     avg = total / (args.iterations)
     print("Average inference time of the last " + str(args.iterations) + " iterations: " + str(avg) + " ms")
 
-    input_shape = [1, 32, 56, 56]
+    input_shape = [1, 32, W, W]
     input_data = torch.randn(input_shape)
     scripted_model = torch.jit.trace(model.cpu(), input_data).eval()
 
@@ -229,7 +230,7 @@ if __name__ == '__main__':
                     do_constant_folding=False,
                     input_names=input_names, output_names=output_names, 
                     training = torch.onnx.TrainingMode.TRAINING,
-                    example_outputs=torch.rand((1, 1280, 4, 4)),
+                    # example_outputs=torch.rand((1, 1280, 4, 4)),
                     opset_version=12)
     onnx_model = onnx.load(f"models/{NAME}.onnx")
 

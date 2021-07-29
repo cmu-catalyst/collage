@@ -9,6 +9,7 @@ import numpy as np
 import argparse
 from tvm import autotvm, auto_scheduler
 
+tvm.autotvm.measure.measure_methods.set_cuda_target_arch("sm_72")
 
 def measure_end_to_end_perf_tensorrt(mod, params, target_str, shape_dict, is_ours):
     from tvm.relay.op.contrib.tensorrt import partition_for_tensorrt
@@ -168,16 +169,16 @@ if __name__ == "__main__":
     # We can't test this because this network include batch norm.
     mod, params, shape_dict, _ = get_network_from_torch(args.network, 1)
 
-    mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
-                                                          True, args.network, args.hw)
-    print(f"[{args.network}] Performance of Ours on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
+    # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
+    #                                                       True, args.network, args.hw)
+    # print(f"[{args.network}] Performance of Ours on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
 
     # mean_perf, std_perf = measure_end_to_end_perf_tensorrt(mod, params, 'cuda', shape_dict, False)
     # print(f"[{args.network}] Performance of TensorRT on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
-    #
-    # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
-    #                                                       False, args.network, args.hw)
-    # print(f"[{args.network}] Performance of AutoTVM on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
+
+    mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
+                                                           False, args.network, args.hw)
+    print(f"[{args.network}] Performance of AutoTVM on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
     #
     # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda -libs=cudnn', shape_dict,
     #                                                       False, args.network, args.hw)
