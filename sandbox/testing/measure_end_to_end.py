@@ -8,6 +8,7 @@ from tvm.contrib import graph_executor as runtime
 import numpy as np
 import argparse
 from tvm import autotvm, auto_scheduler
+from tvm.relay.transform.utility.debug_helper import *
 
 tvm.autotvm.measure.measure_methods.set_cuda_target_arch("sm_72")
 
@@ -41,8 +42,7 @@ def measure_end_to_end_perf_autotvm(net, params, target_str, shape_dict, is_ours
         net = net.with_attr("CustomFusionPass", CustomFusionPass.TWO_LEVEL_OPT)
         net = net.with_attr(NETWORK_FUNC_ATTR, net_name)
         net = net.with_attr(HW_FUNC_ATTR, hw_name)
-
-
+#     else:
     with autotvm.apply_history_best(get_autotvm_log_path(hw_name)):
         with tvm.transform.PassContext(opt_level=OPT_LEVEL.get()):
             lib = relay.build(net, target_str, params=params)
@@ -162,6 +162,7 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
 
+    setup_logging(task_name="e2e_measurement", net_name=args.network, hw_name=args.hw)
     # NasNet-A only works for opt_level 2 (not 3 due to the avgpool2d issue)
     # if args.network == "nasneta":
     #     OPT_LEVEL.set(2)
@@ -169,17 +170,17 @@ if __name__ == "__main__":
     # We can't test this because this network include batch norm.
     mod, params, shape_dict, _ = get_network_from_torch(args.network, 1)
 
-    # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
-    #                                                       True, args.network, args.hw)
-    # print(f"[{args.network}] Performance of Ours on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
+    mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
+                                                          True, args.network, args.hw)
+    print(f"[{args.network}] Performance of Ours on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
 
     # mean_perf, std_perf = measure_end_to_end_perf_tensorrt(mod, params, 'cuda', shape_dict, False)
     # print(f"[{args.network}] Performance of TensorRT on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
 
-    mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
-                                                           False, args.network, args.hw)
-    print(f"[{args.network}] Performance of AutoTVM on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
-    #
+    # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda', shape_dict,
+    #                                                       False, args.network, args.hw)
+    # print(f"[{args.network}] Performance of AutoTVM on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
+    
     # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda -libs=cudnn', shape_dict,
     #                                                       False, args.network, args.hw)
     # print(f"[{args.network}] Performance of AutoTVM+CuDNN on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")

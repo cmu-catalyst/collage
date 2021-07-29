@@ -152,7 +152,7 @@ class EvolutionarySearcher:
 
         try:
             res = err.decode("utf-8").partition("##result:")
-            # assert(len(res)==3)
+            #assert(len(res)==3)
             numbers = res[2].split()
             mean_perf, std_perf = float(numbers[0]), float(numbers[1])
         except:
@@ -414,7 +414,7 @@ class EvolutionarySearcher:
             self.save_time_perf_log(time_perf_dic, total_search_time, best_perf)
 
             # End the program if the time passes;
-            n_hours = 6
+            n_hours = 24
             if total_search_time > n_hours * 3600:
                 printe(f"It exceeds search time limit ({n_hours} hrs), so it stops.")
                 break
