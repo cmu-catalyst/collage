@@ -42,7 +42,7 @@ def measure_end_to_end_perf_autotvm(net, params, target_str, shape_dict, is_ours
         net = net.with_attr("CustomFusionPass", CustomFusionPass.TWO_LEVEL_OPT)
         net = net.with_attr(NETWORK_FUNC_ATTR, net_name)
         net = net.with_attr(HW_FUNC_ATTR, hw_name)
-#     else:
+#    else:
     with autotvm.apply_history_best(get_autotvm_log_path(hw_name)):
         with tvm.transform.PassContext(opt_level=OPT_LEVEL.get()):
             lib = relay.build(net, target_str, params=params)
