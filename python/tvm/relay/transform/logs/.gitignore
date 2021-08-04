@@ -1,2 +1,4 @@
 json_logs
-exp_logs/*
+exp_logs
+autotvm_ops_jetson2.json.tmp
+autotvm_ops_jetson2.json
