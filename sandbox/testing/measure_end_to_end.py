@@ -42,7 +42,7 @@ def measure_end_to_end_perf_autotvm(net, params, target_str, shape_dict, is_ours
         net = net.with_attr("CustomFusionPass", CustomFusionPass.TWO_LEVEL_OPT)
         net = net.with_attr(NETWORK_FUNC_ATTR, net_name)
         net = net.with_attr(HW_FUNC_ATTR, hw_name)
-#    else:
+    # else:
     with autotvm.apply_history_best(get_autotvm_log_path(hw_name)):
         with tvm.transform.PassContext(opt_level=OPT_LEVEL.get()):
             lib = relay.build(net, target_str, params=params)
@@ -181,8 +181,8 @@ if __name__ == "__main__":
     #                                                       False, args.network, args.hw)
     # print(f"[{args.network}] Performance of AutoTVM on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
     
-    # mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda -libs=cudnn', shape_dict,
-    #                                                       False, args.network, args.hw)
+    #  mean_perf, std_perf = measure_end_to_end_perf_autotvm(mod["main"], params, 'cuda -libs=cudnn', shape_dict,
+    #                                                      False, args.network, args.hw)
     # print(f"[{args.network}] Performance of AutoTVM+CuDNN on {args.hw} (mean, std) = ({mean_perf:.4f}+-{std_perf:.4f})")
 
     # mean_perf, std_perf = measure_end_to_end_perf_autosch(mod["main"], params, 'cuda', shape_dict, False)
