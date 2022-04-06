@@ -147,12 +147,12 @@ class EvolutionarySearcher:
         autotvm_tuning_log = CollageContext.pattern_registry.backend_registry["autotvm"].kwargs["tuning_log"]
         backend_list_str = ",".join(CollageContext.backends)
         cmd = [
-                'python3', 
-                script_path, 
-                self.net_name, 
-                self.target_str, 
-                str(self.batch_size), 
-                autotvm_tuning_log, 
+                'python3',
+                script_path,
+                self.net_name,
+                self.target_str,
+                str(self.batch_size),
+                autotvm_tuning_log,
                 backend_list_str,
                 CollageContext.op_cost_logger.log_path,
                 CollageContext.op_level_placement_log,
@@ -175,7 +175,8 @@ class EvolutionarySearcher:
         except:
             logging.info("Error message from subprocess")
             logging.info(err)
-            raise
+            mean_perf, std_perf = 1000000, 0
+            # raise
 
         return mean_perf, std_perf
 
@@ -219,7 +220,7 @@ class EvolutionarySearcher:
         best_opt_match = self.op_state_to_match_translator.translate(best_ind[0])
         self.op_match_logger.save(self.expr, best_opt_match, log_path=CollageContext.graph_level_placement_log)
 
-    
+
         # This is inference time in ms
         best_perf = -self.get_ind_perf_from_pair(best_ind)
         #with open(best_perf_log_path, "w") as best_output:
@@ -276,9 +277,9 @@ class EvolutionarySearcher:
         logging.info(f"Best individual up to this generation is {best_ind}")
 
         # Logging search time and best perf so far
-        
+
         #self.save_time_perf_log(time_perf_dic, total_search_time, best_perf)
-        
+
         return best_ind, best_opt_match, time_perf_dic
 
     def search(self, rnd_seed = 64, n_hours = 0.5):
@@ -394,7 +395,7 @@ class EvolutionarySearcher:
             # Best will choose individual with the biggest negative inference time
             # Warning(@Soo): Note that best_ind is a pair of individual and its perf (negative inference time)
             best_ind, best_opt_match, time_perf_dic = self.update_best_ind_and_time_perf(best_ind, pop, search_start_time, time_perf_dic)
-            
+
             total_search_time = time.time() - search_start_time
             # End the program if the time passes;
             # It was 6 before; however, 3 is enough.
