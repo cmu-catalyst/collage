@@ -16,7 +16,7 @@ if __name__ == '__main__':
     from baselines.pytorch.mobilenetv2 import mobilenet_v2
     from baselines.pytorch.dcgan import DCGAN
     from baselines.pytorch.yolov3 import YoloV3
-    from baselines.pytorch.gpt2 import get_gpt2_model
+    #from baselines.pytorch.gpt2 import get_gpt2_model
 else:
     from .utils import WORKLOADS_DIC
     from .baselines.pytorch.resnets import resnet50, resnext50_32x4d, resnet_block
@@ -28,7 +28,7 @@ else:
     from .baselines.pytorch.mobilenetv2 import mobilenet_v2
     from .baselines.pytorch.dcgan import DCGAN
     from .baselines.pytorch.yolov3 import YoloV3
-    from .baselines.pytorch.gpt2 import get_gpt2_model
+    #from .baselines.pytorch.gpt2 import get_gpt2_model
 
 NETWORK_TO_TORCH_MODEL = {
     "resnet_block": resnet_block,
@@ -45,9 +45,9 @@ NETWORK_TO_TORCH_MODEL = {
     "dcgan": DCGAN,
     "yolov3": YoloV3,
 
-      # Multiple input models
+    # Multiple input models
     # Note that it requires some code changes when evaluating performance
-    "gpt2":get_gpt2_model,
+    #"gpt2":get_gpt2_model,
 }
 
 

@@ -14,7 +14,7 @@ from .baselines.pytorch.resnets_3d import resnet50_3d
 from .baselines.pytorch.mobilenetv2 import mobilenet_v2
 from .baselines.pytorch.dcgan import DCGAN
 from .baselines.pytorch.yolov3 import YoloV3
-from .baselines.pytorch.gpt2 import get_gpt2_model
+#from .baselines.pytorch.gpt2 import get_gpt2_model
 import logging
 import numpy as np
 
@@ -35,7 +35,7 @@ NETWORK_TO_TORCH_MODEL = {
 
     # Multiple input models
     # Note that it requires some code changes when evaluating performance
-    "gpt2":get_gpt2_model(),
+#    "gpt2":get_gpt2_model(),
 }
 
 
