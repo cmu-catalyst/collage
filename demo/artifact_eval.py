@@ -77,7 +77,7 @@ def run_workload(workload, collage_mod):
 
     print(f"[ End-to-End Performance Evaluation ]")
     print(f"# Network: {workload['network_name']}, Collage optimizer: {workload['optimizer']}")
-    print(f"  * Collage Performance (ms) (mean, std) = ({collage_mean_perf:.4f}+-{collage_std_perf:.4f})")
+    print(f"  * Collage Performance (ms) (mean, std) = ({collage_mean_perf:.4f}+-{collage_std_perf:.4f})\n")
 
 def setup_two_level_log():
     # Delete outdated log file for e2e perf of two-level optimizer

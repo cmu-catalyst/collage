@@ -187,7 +187,7 @@ def draw_e2e_perf_plot_normalized(df, args, is_diff_batch=False):
 
 def update_rtx2070_number(df):
     indices = ['bert_full', 'dcgan', 'nasneta', 'resnet50_3d', 'resnext50_32x4d']
-    with open(f'{EXP_RESULT_PATH}/temp/e2e_perf_two_level.log') as f:
+    with open(f'{EXP_RESULT_PATH}/e2e_perf_two_level.log') as f:
         for idx, line in enumerate(f.readlines()):
             mean_perf = float(line.split(",")[0])
             # print(df['Two-level'][idx], mean_perf)
