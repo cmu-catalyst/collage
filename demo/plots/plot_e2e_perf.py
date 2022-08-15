@@ -5,6 +5,10 @@ from scipy import stats
 import argparse
 import numpy as np
 
+# Avoid display of figure
+import matplotlib
+matplotlib.use('Agg')
+
 NET_NAME_TO_OFFICIAL = {'bert_full': 'BERT', 'nasneta':"NasNet-A", 'resnet50': 'ResNet50',
                       'resnext50_32x4d':"ResNeXt50", 'resnet50_3d':"3D-ResNet50",
                       'mobilenet_v2':"Mobilenet V2", 'nasrnn':"NasRNN", 'dcgan':'DCGAN'}
@@ -50,7 +54,7 @@ def setup_df_with_baselines_and_method(df, methods):
     df = df.rename(index=NET_NAME_TO_OFFICIAL)
     # df = df.drop(['Mobilenet V2', 'ResNet50', 'NasRNN'])#, '3D-ResNet50', 'DCGAN', 'NasNet-A', 'ResNeXt50'])
 
-    print(df)
+    # print(df)
     return df
 
 def setup_df_with_baselines_and_method_diff_batch(df, methods):
@@ -69,7 +73,7 @@ def setup_df_with_baselines_and_method_diff_batch(df, methods):
     df = df.rename(index=BATCH_SIZE_TO_TEXT)
     # df = df.drop(['Mobilenet V2', 'ResNet50', 'NasRNN'])#, '3D-ResNet50', 'DCGAN', 'NasNet-A', 'ResNeXt50'])
 
-    print(df)
+    # print(df)
     return df
 
 def setup_df_for_normalized_perf_plot_diff_batch(df):
@@ -133,7 +137,7 @@ def draw_plot_without_nan_values(df, is_diff_batch=False):
         df = df.sort_values(by='BatchSize=1')
     else:
         df = df.sort_values(by='GeoMean')
-    print(df)
+    #print(df)
 
     shifted = df.notnull().cumsum()
     # width of each bar
@@ -181,6 +185,15 @@ def draw_e2e_perf_plot_normalized(df, args, is_diff_batch=False):
     plt.legend(ncol=args.n_method, loc='upper center', bbox_to_anchor=(0.48, box_y_pos), handletextpad=0.3, borderpad=0.3, labelspacing=0.15)
     plt.savefig(f"{EXP_RESULT_PATH}/e2e_perf_norm_{args.hw}_{args.batch_size}.png", bbox_inches='tight')
 
+def update_rtx2070_number(df):
+    indices = ['bert_full', 'dcgan', 'nasneta', 'resnet50_3d', 'resnext50_32x4d']
+    with open(f'{EXP_RESULT_PATH}/temp/e2e_perf_two_level.log') as f:
+        for idx, line in enumerate(f.readlines()):
+            mean_perf = float(line.split(",")[0])
+            # print(df['Two-level'][idx], mean_perf)
+            df.at[indices[idx], 'Two-level'] = mean_perf
+    return df
+
 if __name__ == "__main__":
     set_plt_font_size()
     parser = argparse.ArgumentParser()
@@ -191,7 +204,7 @@ if __name__ == "__main__":
     if args.hw!='diff_batch_v100':
         plt.rc('axes', labelsize=18)
 
-    print(args)
+    #print(args)
     if args.hw in NVIDIA_GPUS or args.hw in INTEL_CPUS:
         df = pd.read_csv(E2E_PERF_LOG_PATH, header=None)
         df.columns = E2E_PERF_COLS
@@ -211,9 +224,16 @@ if __name__ == "__main__":
 
         args.n_method = len(methods)
 
+        # Update numbers for RTX2070 with newly measured number
+        update_rtx2070_number(df)
+
         df = setup_df_with_baselines_and_method(df, methods)
         df = setup_df_for_normalized_perf_plot(df)
         draw_e2e_perf_plot_normalized(df, args)
+
+        final_path = f"{EXP_RESULT_PATH}/e2e_perf_norm_{args.hw}_{args.batch_size}.png"
+        print(f"The plot (e2e perf) is saved to \'{final_path}\'")
+
     elif args.hw == 'diff_batch_v100':
         df = pd.read_csv(E2E_PERF_LOG_PATH, header=None)
         df.columns = E2E_PERF_COLS

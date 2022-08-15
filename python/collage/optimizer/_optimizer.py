@@ -158,7 +158,7 @@ def run_op_level_opt(func_expr):
     backend_registry = pattern_registry.backend_registry
     given_backends = get_backends(func_expr, backend_registry)
     relay_expr = get_function_body(func_expr)
-    
+
     logging.info(f"[Op-Level: DP] Computation graph generation...")
     comp_graph = ComputationGraph(relay_expr)
     n_relay_nodes = comp_graph.n_relay_nodes
@@ -214,12 +214,12 @@ def run_two_level_opt(relay_expr):
     """
 
     # It is a function if you get it from last pass of Relay build
-    print("[Python side] Run two-level optimization")
+    logging.info("[Python side] Run two-level optimization")
 
     # op-level optimization: DP with all backends but external compilers, e.g., TensorRT
     func_expr = relay_expr
     optimized_match, relay_expr, pattern_registry, n_relay_nodes = run_op_level_opt(relay_expr)
-    print("[Python side] Op-level optimization is done")
+    logging.info("[Python side] Op-level optimization is done")
 
     net_name, batch_size = func_expr.attrs["Network"], int(func_expr.attrs["BatchSize"])
     build_target = func_expr.attrs["BuildTarget"]
@@ -242,12 +242,12 @@ def run_two_level_opt(relay_expr):
 
     # Run evolutionary search
     n_ops_after_first_level = len(group_id_to_exprs_anno.keys())
-    print(f"# of matched operators from first level : {n_ops_after_first_level}")
+    logging.info(f"# of matched operators from first level : {n_ops_after_first_level}")
 
     # Unnecessary ops include external compiler ops chosen from first level or
     # Ops that shouldn't be assigned to external compiler such as Tuple or TupleGetItem
     n_ops = len(op_state_to_match_translator.state_id_to_group_id)
-    print(f"# of matched operators from first level after excluding unnecessary ops: {n_ops}")
+    logging.info(f"# of matched operators from first level after excluding unnecessary ops: {n_ops}")
 
     # On the second level, Consider only ops that are not assigned to TensorRT
     # Extract ops that are not assigned to TensorRT

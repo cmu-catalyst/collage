@@ -5,6 +5,10 @@ import tvm
 import logging
 from tvm.contrib import graph_executor as runtime
 
+# Remove warnings for clean output
+import warnings
+warnings.filterwarnings('ignore')
+
 # [NOTE]
 # * Available networks: bert_full, dcgan, nasneta, resnet50_3d, resnext50_32x4d, yolov3, mobilenet_v2
 # * Collage supports following backends by default:
@@ -16,11 +20,13 @@ from tvm.contrib import graph_executor as runtime
 
 # Define Collage workload
 workload = {
-    "optimizer": "op-level",
+#    "optimizer": "op-level",
+    "optimizer": "two-level",
     "backends": ["autotvm", "cudnn", "cublas", "tensorrt"],
     "network_name": "resnext50_32x4d",
     "target": "cuda",
     "batch_size": 1,
+    "ev-budget": 0.5,
 }
 
 # Default logging level. Skip messages during optimization
@@ -44,12 +50,6 @@ def measure_perf(lib, workload):
     perfs = np.array(ftimer().results) * 1000
     return np.mean(perfs), np.std(perfs)
 
-def run_with_tensorrt(workload):
-    from collage.backend.default_backends import cg_TensorRT
-    lib = cg_TensorRT(workload["mod"], workload["target"], workload["params"])
-    return measure_perf(lib, workload)
-
-
 def setup_workload(workload):
     network_name, batch_size, target = \
           workload["network_name"], workload["batch_size"], workload["target"]
@@ -62,32 +62,42 @@ def setup_workload(workload):
 
 def run_workload(workload, collage_mod):
     setup_workload(workload)
-    # Measure TensorRT performance as baseline
-    trt_mean_perf, trt_std_perf = run_with_tensorrt(workload)
 
-   # Invoke collage optimizer
+    # Invoke collage optimizer
     lib = collage_mod.optimize_backend_placement(**workload)
-    collage_mean_perf, collage_std_perf = measure_perf(lib, workload)
+
+    # For two-level optimizer, we have the measurement logged for the best placement during the optimization
+    if workload["optimizer"] == "two-level":
+        with open('plots/e2e_perf_two_level.log') as f:
+            lines = f.readlines()[-1] # Consider only last line correspoding to the most recent eval
+            lines = lines.split(",")
+            collage_mean_perf, collage_std_perf = float(lines[0]), float(lines[1]) # The last one is the most recently measured one
+    else:
+        collage_mean_perf, collage_std_perf = measure_perf(lib, workload)
 
     print(f"[ End-to-End Performance Evaluation ]")
-    print(f"# Performance of Collage is compared against TensorRT")
-    print(f"  speedup = (performance of TensorRT)/(performance of Collage)")
-    print(f"\n")
     print(f"# Network: {workload['network_name']}, Collage optimizer: {workload['optimizer']}")
-    print(f"  * End-to-end performance")
-    print(f"    - Run with TensorRT (mean, std) = ({trt_mean_perf:.4f}+-{trt_std_perf:.4f})")
-    print(f"    - Run with Collage  (mean, std) = ({collage_mean_perf:.4f}+-{collage_std_perf:.4f}), Speedup: {trt_mean_perf/collage_mean_perf:.4f}x")
+    print(f"  * Collage Performance (ms) (mean, std) = ({collage_mean_perf:.4f}+-{collage_std_perf:.4f})")
+
+def setup_two_level_log():
+    # Delete outdated log file for e2e perf of two-level optimizer
+    if workload["optimizer"] == "two-level":
+        import os
+        two_level_log_path = "plots/e2e_perf_two_level.log"
+        if os.path.exists(two_level_log_path):
+            os.remove(two_level_log_path)
 
 if __name__ == "__main__":
     # Operator cost will be logged at "operator_cost.log" by default.
     # If you want to start from scratch, delete previous log file for operator cost.
     # Since it is unreadable, users can dump human-readable form by passing 'dump_readable_cost_log = True'
     collage_mod = collage.Module(op_cost_log_path = "operator_cost.log", dump_readable_cost_log = False)
-    print(f"Default backends: {collage_mod.get_registered_backends()}\n")
+    print(f"Default Collage backends: {collage_mod.get_registered_backends()}\n")
 
     # Override the default tuning log
     # If you don't have tuning log, generate one by running 'autotune_tvm_ops.py'
     collage_mod.update_backend_tuning_log("autotvm", "autotvm_tuning_log_rtx2070.json")
+    setup_two_level_log()
 
     networks = ['bert_full', 'dcgan', 'nasneta', 'resnet50_3d', 'resnext50_32x4d']
     for nn in networks:

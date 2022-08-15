@@ -47,6 +47,10 @@ class EvolutionarySearcher:
         # Debug usage to limit # of measurements
         self.n_test = 0
 
+        # Log std of measurements
+        self.best_std_perf = 0
+        self.best_mean_perf = 99999
+
         # duplicate checker
         # self._memo_state = {}
 
@@ -199,7 +203,11 @@ class EvolutionarySearcher:
             #                                                       self.target_str,
             #                                                       self.net_name, self.hw_name, self.batch_size)
             mean_perf, std_perf = self.measure_subprocess()
+            if mean_perf < self.best_mean_perf:
+                self.best_mean_perf, self.best_std_perf = mean_perf, std_perf
+
         # self._memo_state[individual_hash] = -mean_perf
+
 
         # Deallocate opt_match
         del opt_match
@@ -221,12 +229,8 @@ class EvolutionarySearcher:
         self.op_match_logger.save(self.expr, best_opt_match, log_path=CollageContext.graph_level_placement_log)
 
 
-        # This is inference time in ms
+        # best_perf is inference time in ms
         best_perf = -self.get_ind_perf_from_pair(best_ind)
-        #with open(best_perf_log_path, "w") as best_output:
-        #    best_output.write(f"Best perf: {best_perf}\n")
-        #    best_output.write(f"Best match: {best_ind[0]}\n")
-        #     best_output.write(f"-> 0 means optimal from first pass and 1 means TensorRT")
 
         return best_ind, best_opt_match, best_perf
 
@@ -402,6 +406,11 @@ class EvolutionarySearcher:
             if total_search_time > n_hours * 3600:
                 logging.info(f"It exceeds search time limit ({n_hours} hrs), so it stops.")
                 break
+
+        # We save the best performance from graph-level placement optimizer to the file
+        best_perf = -self.get_ind_perf_from_pair(best_ind)
+        with open('plots/e2e_perf_two_level.log', "a") as best_output:
+            best_output.write(f"{best_perf},{self.best_std_perf}\n")
 
         logging.info("-- End of (successful) evolution --")
 
