@@ -77,7 +77,7 @@ def run_workload(workload, collage_mod):
 
     print(f"[ End-to-End Performance Evaluation ]")
     print(f"# Network: {workload['network_name']}, Collage optimizer: {workload['optimizer']}")
-    print(f"  * Collage Performance (ms) (mean, std) = ({collage_mean_perf:.4f}+-{collage_std_perf:.4f})\n")
+    print(f"  * Collage Performance (ms) (mean, std) = ({collage_mean_perf:.4f}+-{collage_std_perf:.4f})")
 
 def setup_two_level_log():
     # Delete outdated log file for e2e perf of two-level optimizer
@@ -99,9 +99,17 @@ if __name__ == "__main__":
     collage_mod.update_backend_tuning_log("autotvm", "autotvm_tuning_log_rtx2070.json")
     setup_two_level_log()
 
+    import time
+    start_time = time.time()
     networks = ['bert_full', 'dcgan', 'nasneta', 'resnet50_3d', 'resnext50_32x4d']
     for nn in networks:
+        nn_start_time = time.time()
         workload['network_name'] = nn
         setup_workload(workload)
         run_workload(workload, collage_mod)
+        el_time = int(time.time() - nn_start_time)
+        print(f"Elapsed time for {nn}: {el_time}s\n")
+    el_time = int(time.time() - start_time)
+    print(f"Total elapsed time: {el_time}s")
+
 
